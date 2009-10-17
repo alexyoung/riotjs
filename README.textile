@@ -1,4 +1,6 @@
-<code>
+This is an idea for javascript-friendly syntax more than a real implementation.
+
+<pre>
 Riot.run(function() {
   context('basic riot functionality', function() {
     given('some simple equality tests', function() {
@@ -21,4 +23,4 @@ Riot.run(function() {
     asserts('equals should compare strings as expected', 'test string').equals('test string');
   });
 });
-</code>
+</pre>
