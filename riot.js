@@ -4,6 +4,7 @@ Riot = {
   results_id: 'test-results',
   current_context: '',
   debug: false,
+  wants_aliases: true,
 
   aliases: {
     'context': 'Riot.context',
@@ -29,6 +30,10 @@ Riot = {
     },
 
     run: function(times, callback) {
+      if (Riot.wants_aliases) {
+        Riot.alias();
+      }
+
       this.results = [];
       for (i = 0; i < times; i++) {
         var start = new Date();
@@ -52,13 +57,17 @@ Riot = {
   },
 
   alias: function() {
+    var errors = '';
     for (var key in this.aliases) {
       try {
-        eval(key)
+        eval(key);
+        errors += 'Unable to alias: ' + key + ' as ' + this.aliases[key];
       } catch (exception) {
         eval(key + ' = ' + this.aliases[key]);
       }
     }
+
+    if (errors.length > 0) { alert('Riot warning: ' + errors); }
   },
 
   context: function(title, callback) {
@@ -195,5 +204,3 @@ Assertion.prototype.expected = function() {
 
   return this._expected;
 }
-
-Riot.alias();
