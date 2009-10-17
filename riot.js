@@ -25,7 +25,7 @@ Riot = {
         total += this.results[i];
       }
       seconds = total / 1000;
-      return this.results.length + ' benchmarks ran in ' + total + 'ms (' + seconds + ' seconds)';
+      return 'Elapsed time: ' + total + 'ms (' + seconds + ' seconds)';
     },
 
     run: function(times, callback) {
