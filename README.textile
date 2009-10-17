@@ -14,7 +14,7 @@ Riot.run(function() {
 
     given('a context concerned with functions', function() {
       asserts('asserts() should allow functions to be compared', function() {
-        return 'test string'
+        return 'test string';
       }).equals('test string');
     });
   });
