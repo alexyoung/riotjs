@@ -25,6 +25,12 @@ Riot.run(function() {
         return 'test string';
       }).equals('test string');
     });
+
+    given('some objects that need type checks', function() {
+      asserts('a string should be a String', 'String').kindOf('String');
+      asserts('an array should be an Array', [1, 2, 3]).kindOf('Array');
+      asserts('an array should be an Array', null).typeOf('null');
+    });
   });
 
   given('yet another context', function() {

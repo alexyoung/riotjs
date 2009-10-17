@@ -91,6 +91,29 @@ Assertion.prototype.equals = function(expected) {
   }
 }
 
+Assertion.prototype.typeOf = function(expected) {
+  var v = this.expected(),
+      t = typeof this.expected();
+  if (t === 'object') {
+    if (v) {
+      if (typeof v.length === 'number' &&
+          !(v.propertyIsEnumerable('length')) &&
+          typeof v.splice === 'function') {
+        t = 'array';
+      }
+    } else {
+      t = 'null';
+    }
+  }
+
+  if (t == expected.toLowerCase()) {
+    this.pass();
+  } else {
+    this.fail(expected + ' is not a type of ' + this.expected());
+  }
+}
+Assertion.prototype.kindOf = Assertion.prototype.typeOf;
+
 Assertion.prototype.isTrue = function() {
   if (this.expected() == true) {
     this.pass();
