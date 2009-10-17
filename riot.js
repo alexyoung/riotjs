@@ -23,19 +23,19 @@ Riot = {
   summariseAllResults: function() { return this.summarise(this.all_results); },
 
   summarise: function(results) {
-    var passes = 0,
-        fails  = 0;
+    var passes   = 0,
+        failures = 0;
     for (i = 0; i < results.length; i++) {
-      results[i].pass ? passes += 1 : fails += 1;
+      results[i].pass ? (passes += 1) : (failures += 1);
     }
-
-    this.display('<p class="summary">' + results.length + ' assertions: ' + fails + ' failures</p>');
+    this.display('<p class="summary">' + results.length + ' assertions: ' + failures + ' failures</p>');
   },
 
-  addResult: function(assertion, pass) {
+  addResult: function(context, assertion, pass) {
     var result = {
       assertion: assertion,
-      pass:      pass
+      pass:      pass,
+      context:   context
     };
     this.results.push(result);
     this.all_results.push(result);
@@ -74,12 +74,12 @@ function Assertion(name, expected) {
 }
 
 Assertion.prototype.fail = function(message) {
-  Riot.addResult('', this.name, false);
+  Riot.addResult(this.current_context, this.name, false);
   Riot.displayMessage(message, false);
 }
 
 Assertion.prototype.pass = function() {
-  Riot.addResult('', this.name, true);
+  Riot.addResult(this.current_context, this.name, true);
   Riot.displayMessage(this.name, true);
 }
 
