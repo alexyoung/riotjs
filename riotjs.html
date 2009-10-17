@@ -5,6 +5,7 @@
     <style>
 span.pass { color: green; font-weight: bold }
 span.fail { color: red; font-weight: bold }
+#test-results ul { margin-bottom: 1wm }
     </style>
     <script type="text/javascript">
 /* Benchmarks */
@@ -75,6 +76,11 @@ Riot = {
     });
   },
 
+  display: function(html) {
+    var results = document.getElementById(this.results_id);
+    results.innerHTML += html;
+  },
+
   displayLine: function(message, debug) {
     var results = document.getElementById(this.results_id),
         li      = document.createElement('li'),
@@ -105,8 +111,10 @@ Context.prototype.run = function() {
   Riot.current_context = this.name;
   Riot.reset();
   Riot.displayLine('<em>context</em>: ' + Riot.current_context, true);
+  Riot.display('<ul>');
   context.callback();
   Riot.summariseResults();
+  Riot.display('</ul>');
   Riot.displayLine('<em>end context</em>: ' + Riot.current_context, true);
   Riot.current_context = '';
 }
@@ -199,7 +207,7 @@ Riot.run(function() {
   </script>
   </head>
   <body>
-    <ul id="test-results"></ul>
+    <div id="test-results"></div>
   </body>
 </html>
 
