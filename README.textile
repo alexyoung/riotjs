@@ -1,0 +1,24 @@
+<code>
+Riot.run(function() {
+  context('basic riot functionality', function() {
+    given('some simple equality tests', function() {
+      asserts('a simple truth test should return true', true).isTrue();
+      asserts('isNull is null', null).isNull();
+    });
+
+    given('another context', function() {
+      asserts('equals should compare strings as expected', 'test string').equals('test string');
+    });
+
+    given('a context concerned with functions', function() {
+      asserts('asserts() should allow functions to be compared', function() {
+        return 'test string'
+      }).equals('test string');
+    });
+  });
+
+  given('yet another context', function() {
+    asserts('equals should compare strings as expected', 'test string').equals('test string');
+  });
+});
+</code>

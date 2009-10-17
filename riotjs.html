@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Riot</title>
+    <style>
+span.pass { color: green; font-weight: bold }
+span.fail { color: red; font-weight: bold }
+    </style>
+    <script type="text/javascript">
+/* Benchmarks */
+Benchmark = {
+  results: [],
+
+  addResult: function(start, end) {
+    this.results.push(end - start);
+  },
+
+  displayResults: function() {
+    var total = 0,
+        seconds = 0;
+    for (i = 0; i < this.results.length; i++) {
+      total += this.results[i];
+    }
+
+    seconds = total / 1000;
+
+    return this.results.length + ' benchmarks ran in ' + total + 'ms (' + seconds + ' seconds)';
+  },
+
+  run: function(times, callback) {
+    this.results = [];
+    for (i = 0; i < times; i++) {
+      var start = new Date();
+      callback();
+      var end = new Date();
+      this.addResult(start, end);
+    }
+    console.log(this.displayResults());
+  }
+};
+
+/* Riot */
+Riot = {
+  results: [],
+  results_id: 'test-results',
+  current_context: '',
+  debug: false,
+
+  run: function(tests) {
+    var onload = window.onload;
+    window.onload = function() {
+      if (onload) window.onload();
+      tests();
+    }
+  },
+
+  reset: function() {
+    this.results = [];
+  },
+
+  summariseResults: function() {
+    var passes = 0,
+        fails  = 0;
+    for (i = 0; i < this.results.length; i++) {
+      this.results[i].pass ? passes += 1 : fails += 1;
+    }
+
+    this.displayLine('<strong>' + this.results.length + ' assertions: ' + fails + ' failures</strong>');
+  },
+
+  addResult: function(assertion, pass) {
+    this.results.push({
+      assertion: assertion,
+      pass:      pass
+    });
+  },
+
+  displayLine: function(message, debug) {
+    var results = document.getElementById(this.results_id),
+        li      = document.createElement('li'),
+        debug   = (typeof debug === 'undefined') ? false : debug === true;
+    li.innerHTML = message;
+
+    if ((debug && this.debug) || !debug) {
+      results.appendChild(li);
+    }
+  },
+
+  displayMessage: function(message, pass) {
+    var message   = (pass ? '[PASS] ' : '[FAIL] ') + message,
+        className = pass ? 'pass' : 'fail';
+    this.displayLine('<span class="' + className + '">' + message + '</span>');
+  }
+};
+
+function Context(name, callback) {
+  this.name     = name;
+  this.callback = callback;
+}
+
+Context.prototype.run = function() {
+  var context = this,
+      onload  = window.onload;
+
+  Riot.current_context = this.name;
+  Riot.reset();
+  Riot.displayLine('<em>context</em>: ' + Riot.current_context, true);
+  context.callback();
+  Riot.summariseResults();
+  Riot.displayLine('<em>end context</em>: ' + Riot.current_context, true);
+  Riot.current_context = '';
+}
+
+function Assertion(name, expected) {
+  this.name          = name;
+  this.expectedValue = expected;
+}
+
+Assertion.prototype.fail = function(message) {
+  Riot.addResult('', this.name, false);
+  Riot.displayMessage(message, false);
+}
+
+Assertion.prototype.pass = function() {
+  Riot.addResult('', this.name, true);
+  Riot.displayMessage(this.name, true);
+}
+
+Assertion.prototype.equals = function(expected) {
+  if (expected == this.expected()) {
+    this.pass();
+  } else {
+    this.fail(expected + ' does not equal: ' + this.expected());
+  }
+}
+
+Assertion.prototype.isTrue = function() {
+  if (this.expected() == true) {
+    this.pass();
+  } else {
+    this.fail('was not true');
+  }
+}
+
+Assertion.prototype.isNull = function() {
+  if (this.expected() === null) {
+    this.pass();
+  } else {
+    this.fail('was not null');
+  }
+}
+
+Assertion.prototype.expected = function() {
+  if (typeof this._expected === 'undefined') {
+    if (typeof this.expectedValue === 'function') {
+      this._expected = this.expectedValue();
+    } else {
+      this._expected = this.expectedValue;
+    }
+  }
+
+  return this._expected;
+}
+
+function context(title, callback) {
+  var c = new Context(title, callback);
+  c.run();
+}
+
+given = context;
+
+function asserts(name, result) {
+  return new Assertion(name, result);
+}
+
+/* Tests */
+Riot.run(function() {
+  context('basic riot functionality', function() {
+    given('some simple equality tests', function() {
+      asserts('a simple truth test should return true', true).isTrue();
+      asserts('isNull is null', null).isNull();
+    });
+
+    given('another context', function() {
+      asserts('equals should compare strings as expected', 'test string').equals('test string');
+    });
+
+    given('a context concerned with functions', function() {
+      asserts('asserts() should allow functions to be compared', function() {
+        return 'test string'
+      }).equals('test string');
+    });
+  });
+
+  given('yet another context', function() {
+    asserts('equals should compare strings as expected', 'test string').equals('test string');
+  });
+});
+  </script>
+  </head>
+  <body>
+    <ul id="test-results"></ul>
+  </body>
+</html>
+
