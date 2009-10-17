@@ -119,88 +119,89 @@ Riot = {
 function Context(name, callback) {
   this.name     = name;
   this.callback = callback;
-}
 
-Context.prototype.run = function() {
-  var context = this;
-  Riot.current_context = this.name;
-  Riot.reset();
-  Riot.display('<h3>' + this.name + '</h3>');
-  context.callback();
-  Riot.current_context = '';
-  Riot.reset();
+  this.run = function() {
+    var context = this;
+    Riot.current_context = this.name;
+    Riot.reset();
+    Riot.display('<h3>' + this.name + '</h3>');
+    context.callback();
+    Riot.current_context = '';
+    Riot.reset();
+  }
 }
 
 function Assertion(name, expected) {
   this.name          = name;
   this.expectedValue = expected;
-}
 
-Assertion.prototype.fail = function(message) {
-  Riot.addResult(this.current_context, this.name, false);
-  Riot.displayMessage(message, false);
-}
-
-Assertion.prototype.pass = function() {
-  Riot.addResult(this.current_context, this.name, true);
-  Riot.displayMessage(this.name, true);
-}
-
-Assertion.prototype.equals = function(expected) {
-  if (expected == this.expected()) {
-    this.pass();
-  } else {
-    this.fail(expected + ' does not equal: ' + this.expected());
+  this.fail = function(message) {
+    Riot.addResult(this.current_context, this.name, false);
+    Riot.displayMessage(message, false);
   }
-}
 
-Assertion.prototype.typeOf = function(expected) {
-  var v = this.expected(),
-      t = typeof this.expected();
-  if (t === 'object') {
-    if (v) {
-      if (typeof v.length === 'number' &&
-          !(v.propertyIsEnumerable('length')) &&
-          typeof v.splice === 'function') {
-        t = 'array';
+  this.pass = function() {
+    Riot.addResult(this.current_context, this.name, true);
+    Riot.displayMessage(this.name, true);
+  }
+
+  this.equals = function(expected) {
+    if (expected == this.expected()) {
+      this.pass();
+    } else {
+      this.fail(expected + ' does not equal: ' + this.expected());
+    }
+  }
+
+  this.typeOf = function(expected) {
+    var v = this.expected(),
+        t = typeof this.expected();
+    if (t === 'object') {
+      if (v) {
+        if (typeof v.length === 'number' &&
+            !(v.propertyIsEnumerable('length')) &&
+            typeof v.splice === 'function') {
+          t = 'array';
+        }
+      } else {
+        t = 'null';
       }
+    }
+
+    if (t == expected.toLowerCase()) {
+      this.pass();
     } else {
-      t = 'null';
+      this.fail(expected + ' is not a type of ' + this.expected());
     }
   }
 
-  if (t == expected.toLowerCase()) {
-    this.pass();
-  } else {
-    this.fail(expected + ' is not a type of ' + this.expected());
-  }
-}
-Assertion.prototype.kindOf = Assertion.prototype.typeOf;
+  this.kindOf = this.typeOf;
 
-Assertion.prototype.isTrue = function() {
-  if (this.expected() == true) {
-    this.pass();
-  } else {
-    this.fail('was not true');
-  }
-}
-
-Assertion.prototype.isNull = function() {
-  if (this.expected() === null) {
-    this.pass();
-  } else {
-    this.fail('was not null');
-  }
-}
-
-Assertion.prototype.expected = function() {
-  if (typeof this._expected === 'undefined') {
-    if (typeof this.expectedValue === 'function') {
-      this._expected = this.expectedValue();
+  this.isTrue = function() {
+    if (this.expected() == true) {
+      this.pass();
     } else {
-      this._expected = this.expectedValue;
+      this.fail('was not true');
     }
   }
 
-  return this._expected;
+  this.isNull = function() {
+    if (this.expected() === null) {
+      this.pass();
+    } else {
+      this.fail('was not null');
+    }
+  }
+
+  this.expected = function() {
+    if (typeof this._expected === 'undefined') {
+      if (typeof this.expectedValue === 'function') {
+        this._expected = this.expectedValue();
+      } else {
+        this._expected = this.expectedValue;
+      }
+    }
+
+    return this._expected;
+  }
 }
