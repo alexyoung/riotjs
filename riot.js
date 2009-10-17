@@ -5,6 +5,12 @@ Riot = {
   current_context: '',
   debug: false,
 
+  aliases: {
+    'context': 'Riot.context',
+    'given':   'Riot.context',
+    'asserts': 'Riot.asserts',
+  },
+
   Benchmark: {
     results: [],
 
@@ -41,8 +47,26 @@ Riot = {
       var benchmark = Riot.Benchmark.run(1, tests);
       Riot.display('<hr />');
       Riot.summariseAllResults();
-      Riot.display(benchmark);
+      Riot.display('<p>' + benchmark + '</p>');
     }
+  },
+
+  alias: function() {
+    for (var key in this.aliases) {
+      try {
+        eval(key)
+      } catch (exception) {
+        eval(key + ' = ' + this.aliases[key]);
+      }
+    }
+  },
+
+  context: function(title, callback) {
+    new Context(title, callback).run();
+  },
+
+  asserts: function(name, result) {
+    return new Assertion(name, result);
   },
 
   reset: function() {
@@ -172,13 +196,4 @@ Assertion.prototype.expected = function() {
   return this._expected;
 }
 
-function context(title, callback) {
-  var c = new Context(title, callback);
-  c.run();
-}
-
-given = context;
-
-function asserts(name, result) {
-  return new Assertion(name, result);
-}
+Riot.alias();
