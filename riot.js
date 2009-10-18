@@ -207,6 +207,18 @@ function Assertion(name, expected) {
     }
   }
 
+  this.raises = function(expected) {
+    try {
+      this.expectedValue();
+    } catch (exception) {
+      if (expected == exception) {
+        this.pass();
+        return;
+      }
+    }
+    this.fail('did not raise ' + expected);
+  }
+
   this.typeOf = function(expected) {
     var v = this.expected(),
         t = typeof this.expected();
