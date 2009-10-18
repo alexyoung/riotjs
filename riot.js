@@ -1,7 +1,6 @@
 Riot = {
   all_results: [],
   results: [],
-  results_id: 'test-results',
   current_context: '',
   debug: false,
   wants_aliases: true,
@@ -45,15 +44,81 @@ Riot = {
     }
   },
 
-  run: function(tests) {
-    var onload = window.onload;
-    window.onload = function() {
-      if (onload) window.onload();
-      var benchmark = Riot.Benchmark.run(1, tests);
-      Riot.display('<hr />');
-      Riot.summariseAllResults();
-      Riot.display('<p>' + benchmark + '</p>');
+  Formatters: {
+    HTML: function() {
+      function display(html) {
+        var results = document.getElementById('test-results');
+        results.innerHTML += html;
+      }
+
+      this.line = function(text) {
+        display('<p>' + text + '</p>');
+      }
+
+      this.pass = function(message) {
+        display('<p class="pass">' + message + '</p>');
+      }
+
+      this.fail = function(message) {
+        display('<p class="fail">' + message + '</p>');
+      }
+
+      this.context = function(name) {
+        display('<h3>' + name + '</h3>');
+      }
+
+      this.separator = function() {
+        display('<hr />');
+      }
+    },
+
+    Text: function() {
+      function display(text) {
+        print(text);
+      }
+
+      this.line = function(text) {
+        display(text);
+      }
+
+      this.pass = function(message) {
+        this.line("  [PASS] " + message);
+      }
+
+      this.fail = function(message) {
+        this.line("  [FAIL] " + message);
+      }
+
+      this.context = function(name) {
+        this.line("* " + name);
+      }
+
+      this.separator = function() {
+        this.line('--------------------------------------------------');
+      }
     }
+  },
+
+  run: function(tests) {
+    if (typeof window === 'undefined') {
+      Riot.formatter = new Riot.Formatters.Text();
+      alert = print;
+      Riot._run(tests);
+    } else {
+      Riot.formatter = new Riot.Formatters.HTML();
+      var onload = window.onload;
+      window.onload = function() {
+        if (onload) window.onload();
+        Riot._run(tests);
+      }
+    }
+  },
+
+  _run: function(tests) {
+    var benchmark = Riot.Benchmark.run(1, tests);
+    Riot.formatter.separator();
+    Riot.summariseAllResults();
+    Riot.formatter.line(benchmark);
   },
 
   alias: function() {
@@ -91,7 +156,7 @@ Riot = {
     for (i = 0; i < results.length; i++) {
       results[i].pass ? (passes += 1) : (failures += 1);
     }
-    this.display('<p class="summary">' + results.length + ' assertions: ' + failures + ' failures</p>');
+    this.formatter.line(results.length + ' assertions: ' + failures + ' failures');
   },
 
   addResult: function(context, assertion, pass) {
@@ -102,17 +167,6 @@ Riot = {
     };
     this.results.push(result);
     this.all_results.push(result);
-  },
-
-  display: function(html) {
-    var results = document.getElementById(this.results_id);
-    results.innerHTML += html;
-  },
-
-  displayMessage: function(message, pass) {
-    var message   = (pass ? '[PASS] ' : '[FAIL] ') + message,
-        className = pass ? 'pass' : 'fail';
-    this.display('<p class="' + className + '">' + message + '</p>');
   }
 };
 
@@ -124,7 +178,7 @@ function Context(name, callback) {
     var context = this;
     Riot.current_context = this.name;
     Riot.reset();
-    Riot.display('<h3>' + this.name + '</h3>');
+    Riot.formatter.context(this.name);
     context.callback();
     Riot.current_context = '';
     Riot.reset();
@@ -137,12 +191,12 @@ function Assertion(name, expected) {
 
   this.fail = function(message) {
     Riot.addResult(this.current_context, this.name, false);
-    Riot.displayMessage(message, false);
+    Riot.formatter.fail(message);
   }
 
   this.pass = function() {
     Riot.addResult(this.current_context, this.name, true);
-    Riot.displayMessage(this.name, true);
+    Riot.formatter.pass(this.name);
   }
 
   this.equals = function(expected) {
