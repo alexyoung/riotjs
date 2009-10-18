@@ -31,7 +31,8 @@ Riot.run(function() {
 
 h3. Assertions
 
-* <code>equals</code>
+* <code>equals</code> - asserts('description').equals('value')
 * <code>isNull</code>
+* <code>isTrue</code>
 * <code>typeOf</code>
 * <code>raises</code>
