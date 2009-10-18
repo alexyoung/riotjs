@@ -1,5 +1,7 @@
 This is a JavaScript implementation of "Riot":http://github.com/thumblemonks/riot/
 
+It will run in a browser or in Rhino.
+
 The tests look like this:
 
 <pre>
@@ -26,3 +28,10 @@ Riot.run(function() {
   });
 });
 </pre>
+
+h3. Assertions
+
+* <code>equals</code>
+* <code>isNull</code>
+* <code>typeOf</code>
+* <code>raises</code>
