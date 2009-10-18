@@ -36,3 +36,7 @@ h3. Assertions
 * <code>isTrue</code>
 * <code>typeOf</code>
 * <code>raises</code>
+
+h3. Aliases
+
+The <code>context</code> and <code>asserts</code> functions are aliased as global methods from the <code>Riot</code> object.  If those methods are already used you can use the namespaced methods (like <code>Riot.context</code>).
