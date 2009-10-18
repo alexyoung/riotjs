@@ -1,4 +1,6 @@
-This is an idea for javascript-friendly syntax more than a real implementation.
+This is a JavaScript implementation of "Riot":http://github.com/thumblemonks/riot/
+
+The tests look like this:
 
 <pre>
 Riot.run(function() {
