@@ -75,15 +75,15 @@ var Riot = {
       };
 
       this.pass = function(message) {
-        this.line("  [PASS] " + message);
+        this.line('  +[32m ' + message + '[0m');
       };
 
       this.fail = function(message) {
-        this.line("  [FAIL] " + message);
+        this.line('  -[31m ' + message + '[0m');
       };
 
       this.context = function(name) {
-        this.line("* " + name);
+        this.line(name);
       };
 
       this.separator = function() {
@@ -92,9 +92,11 @@ var Riot = {
     }
   },
 
-  Context: function(name, callback) {
-    this.name     = name;
-    this.callback = callback;
+  Context: function(name, callback, setup, teardown) {
+    this.name             = name;
+    this.callback         = callback;
+    this.setupFunction    = setup;
+    this.teardownFunction = teardown;
 
     this.run = function() {
       var context = this;
@@ -102,8 +104,21 @@ var Riot = {
       Riot.reset();
       Riot.formatter.context(this.name);
       context.callback();
+      context.teardown();
       Riot.current_context = '';
       Riot.reset();
+    };
+
+    this.setup = function() {
+      if (typeof this.setupFunction !== 'undefined') {
+        return this.setupFunction();
+      }
+    };
+
+    this.teardown = function() {
+      if (typeof this.teardownFunction !== 'undefined') {
+        return this.teardownFunction();
+      }
     };
   },
 
@@ -221,16 +236,31 @@ var Riot = {
   },
 
   withRiot: function(fn) {
-    //return function() { eval('with (Riot) {\n' + fn.toString() + '\n}'); };
     return function() { eval('with (Riot) {\n' + Riot.functionBody(fn) + '\n}\n'); }
   },
 
   context: function(title, callback) {
-    return new Riot.Context(title, callback).run();
+    var context = new Riot.Context(title, callback, this.setupFunction, this.teardownFunction);
+    this.setupFunction = undefined;
+    this.teardownFunction = undefined;
+    return context.run();
+  },
+
+  given: function(title, callback) {
+    title = 'Given ' + title;
+    return this.context(title, callback);
   },
 
   asserts: function(name, result) {
     return new Riot.Assertion(name, result);
+  },
+
+  setup: function(setupFunction) {
+    this.setupFunction = setupFunction;
+  },
+
+  teardown: function(teardownFunction) {
+    this.teardownFunction = teardownFunction;
   },
 
   reset: function() {
@@ -259,4 +289,4 @@ var Riot = {
   }
 };
 
-Riot.given = Riot.context;
+Riot.should = Riot.asserts;

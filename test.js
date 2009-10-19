@@ -3,7 +3,7 @@ if (typeof load != 'undefined') {
 }
 
 Riot.run(function() {
-  context('basic riot functionality', function() {
+  context('Basic riot functionality', function() {
     given('some simple equality tests', function() {
       asserts('a simple truth test should return true', true).isTrue();
       asserts('isNull is null', null).isNull();
@@ -17,6 +17,12 @@ Riot.run(function() {
       asserts('asserts() should allow functions to be compared', function() {
         return 'test string';
       }).equals('test string');
+    });
+
+    given('an example that requires a variable', function() {
+      var user = { name: 'Grumble' };
+
+      should('get evaluated before the assertions', user.name).equals('Grumble');
     });
 
     given('some objects that need type checks', function() {
