@@ -37,4 +37,3 @@ Riot.run(function() {
     asserts('equals should compare strings as expected', 'test string').equals('test string');
   });
 });
-

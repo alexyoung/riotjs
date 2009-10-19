@@ -5,13 +5,6 @@ var Riot = {
   results: [],
   current_context: '',
   debug: false,
-  wants_aliases: true,
-
-  aliases: {
-    'context': 'Riot.context',
-    'given':   'Riot.context',
-    'asserts': 'Riot.asserts'
-  },
 
   Benchmark: {
     results: [],
@@ -32,10 +25,6 @@ var Riot = {
     },
 
     run: function(times, callback) {
-      if (Riot.wants_aliases) {
-        Riot.alias();
-      }
-
       this.results = [];
       for (var i = 0; i < times; i++) {
         var start = new Date(),
@@ -221,24 +210,19 @@ var Riot = {
   },
 
   runAndReport: function(tests) {
-    var benchmark = Riot.Benchmark.run(1, tests);
+    var benchmark = Riot.Benchmark.run(1, this.withRiot(tests));
     Riot.formatter.separator();
     Riot.summariseAllResults();
     Riot.formatter.line(benchmark);
   },
 
-  alias: function() {
-    var errors = '';
-    for (var key in this.aliases) { if (this.aliases.hasOwnProperty(key)) {
-      try {
-        eval(key);
-        errors += 'Unable to alias: ' + key + ' as ' + this.aliases[key];
-      } catch (exception) {
-        eval(key + ' = ' + this.aliases[key]);
-      }
-    }}
+  functionBody: function(fn) {
+    return fn.toString().match(/^[^\{]*{((.*\n*)*)}/m)[1];
+  },
 
-    if (errors.length > 0) { alert('Riot warning: ' + errors); }
+  withRiot: function(fn) {
+    //return function() { eval('with (Riot) {\n' + fn.toString() + '\n}'); };
+    return function() { eval('with (Riot) {\n' + Riot.functionBody(fn) + '\n}\n'); }
   },
 
   context: function(title, callback) {
@@ -274,3 +258,5 @@ var Riot = {
     this.all_results.push(result);
   }
 };
+
+Riot.given = Riot.context;
