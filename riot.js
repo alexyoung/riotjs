@@ -87,7 +87,7 @@ var Riot = {
       };
 
       this.separator = function() {
-        this.line('--------------------------------------------------');
+        this.line('');
       };
     }
   },

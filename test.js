@@ -29,13 +29,10 @@ Riot.run(function() {
       asserts('a string should be a String', 'String').kindOf('String');
       asserts('an array should be an Array', [1, 2, 3]).kindOf('Array');
       asserts('an array should be an Array', null).typeOf('null');
-      asserts('an array should be an Array', null).typeOf('wrong');
     });
 
     given('some exceptions', function() {
       asserts('this should raise ExampleError', function() { throw('ExampleError'); }).raises('ExampleError');
-      asserts('this should fail', function() { }).raises('ExampleError');
-      asserts('this should fail', function() { throw('AnotherError'); }).raises('ExampleError');
     });
   });
 
