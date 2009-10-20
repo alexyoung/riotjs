@@ -37,10 +37,14 @@ h3. Assertions
 * <code>typeOf</code>
 * <code>raises</code>
 
-h3. Aliases
-
-The <code>context</code> and <code>asserts</code> functions are aliased as global methods from the <code>Riot</code> object.  If those methods are already used you can use the namespaced methods (like <code>Riot.context</code>).
-
 h3. Riot.run
 
 <code>Riot.run(function() { // your tests });</code> just adds your tests to <code>window.onload</code>.  If there's already an <code>onload</code> handler it'll prepend it.  If there's no <code>window</code> it will just run the tests.
+
+h3. Todo
+
+* Assert matches
+* Add formatter for xpcomcore
+* Ask g-man about actual() -- I defer execution to transparently match functions/values, but does this make sense?
+* Extract the assertions into their own property list so adding user-defined ones is cleaner
+* If you don't give a damn then we don't give a fuck
