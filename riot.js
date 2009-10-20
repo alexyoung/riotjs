@@ -280,6 +280,14 @@ Riot.Assertion.prototype = {
     });
   },
 
+  matches: function(expected) {
+    this.setAssertion(function(actual) {
+      if (!expected.test(actual())) {
+        this.fail("Expected '" + actual() + "' to match '" + expected + "'");
+      }
+    });
+  },
+
   raises: function(expected) {
     this.setAssertion(function(actual) {
       try {

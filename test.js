@@ -14,8 +14,9 @@ Riot.run(function() {
       asserts('no chained test expected a value', true);
     });
 
-    given('another context', function() {
-      asserts('equals should compare strings as expected', 'test string').equals('test string');
+    given('some string tests', function() {
+      should('compare strings with equals', 'test string').equals('test string');
+      should('match expressions with matches', 'test').matches(/test/);
     });
 
     given('a context concerned with functions', function() {
