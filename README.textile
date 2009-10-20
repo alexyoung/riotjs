@@ -43,9 +43,7 @@ h3. Riot.run
 
 h3. Todo
 
-* Assert matches
 * Add formatter for xpcomcore
-* Gabriel will probably like java.lang.System.exit(1); for CI builds
 * Ask g-man about actual() -- I defer execution to transparently match functions/values, but does this make sense?
 * Extract the assertions into their own property list so adding user-defined ones is cleaner
 * If you don't give a damn then we don't give a fuck

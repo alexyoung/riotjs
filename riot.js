@@ -6,8 +6,8 @@ var Riot = {
   run: function(tests) {
     if (typeof window === 'undefined') {
       Riot.formatter = new Riot.Formatters.Text();
-      alert = print;
       Riot.runAndReport(tests);
+      java.lang.System.exit(Riot.exit_code);
     } else {
       Riot.formatter = new Riot.Formatters.HTML();
       var onload = window.onload;
@@ -61,6 +61,7 @@ var Riot = {
       if (!results[i].pass) { failures++; }
     }
     this.formatter.line(results.length + ' assertions: ' + failures + ' failures');
+    this.exit_code = failures > 0 ? 1 : 0;
   },
 
   addResult: function(context, assertion, pass) {
@@ -217,7 +218,7 @@ Riot.Context.prototype = {
         }
       }
 
-      Riot.addResult(this.name, assertion.name, true);
+      Riot.addResult(this.name, assertion.name, pass);
     }
   }
 };
