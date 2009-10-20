@@ -1,10 +1,7 @@
 /*jslint white: false plusplus: false onevar: false browser: true evil: true*/
 /*global window: true*/
 var Riot = {
-  all_results: [],
   results: [],
-  current_context: '',
-  debug: false,
 
   Benchmark: {
     results: [],
@@ -98,15 +95,17 @@ var Riot = {
     this.setupFunction    = setup;
     this.teardownFunction = teardown;
 
+    this.asserts = function(name, result) {
+      return new Riot.Assertion(this.name, name, result);
+    },
+
+    this.should = this.asserts;
+    this.given  = Riot.given;
+
     this.run = function() {
-      var context = this;
-      Riot.current_context = this.name;
-      Riot.reset();
       Riot.formatter.context(this.name);
-      context.callback();
-      context.teardown();
-      Riot.current_context = '';
-      Riot.reset();
+      Riot.withThis(this, callback)();
+      this.teardown();
     };
 
     this.setup = function() {
@@ -122,17 +121,18 @@ var Riot = {
     };
   },
 
-  Assertion: function(name, expected) {
-    this.name          = name;
-    this.expectedValue = expected;
+  Assertion: function(context_name, name, expected) {
+    this.name           = name;
+    this.expected_value = expected;
+    this.context_name   = context_name;
 
     this.fail = function(message) {
-      Riot.addResult(this.current_context, this.name, false);
+      Riot.addResult(this.context, this.name, false);
       Riot.formatter.fail(message);
     };
 
     this.pass = function() {
-      Riot.addResult(this.current_context, this.name, true);
+      Riot.addResult(this.context, this.name, true);
       Riot.formatter.pass(this.name);
     };
 
@@ -146,7 +146,7 @@ var Riot = {
 
     this.raises = function(expected) {
       try {
-        this.expectedValue();
+        this.expected_value();
       } catch (exception) {
         if (expected === exception) {
           this.pass();
@@ -184,7 +184,7 @@ var Riot = {
       if (this.expected() === true) {
         this.pass();
       } else {
-        this.fail('was not true');
+        this.fail(this.expected() + ' was not true');
       }
     };
 
@@ -192,20 +192,20 @@ var Riot = {
       if (this.expected() === null) {
         this.pass();
       } else {
-        this.fail('was not null');
+        this.fail(this.expected() + ' was not null');
       }
     };
 
     this.expected = function() {
-      if (typeof this.expectedMemo === 'undefined') {
-        if (typeof this.expectedValue === 'function') {
-          this.expectedMemo = this.expectedValue();
+      if (typeof this.expected_memo === 'undefined') {
+        if (typeof this.expected_value === 'function') {
+          this.expected_memo = this.expected_value();
         } else {
-          this.expectedMemo = this.expectedValue;
+          this.expected_memo = this.expected_value;
         }
       }
 
-      return this.expectedMemo;
+      return this.expected_memo;
     };
   },
 
@@ -225,7 +225,7 @@ var Riot = {
   },
 
   runAndReport: function(tests) {
-    var benchmark = Riot.Benchmark.run(1, this.withRiot(tests));
+    var benchmark = Riot.Benchmark.run(1, this.withThis(Riot, tests));
     Riot.formatter.separator();
     Riot.summariseAllResults();
     Riot.formatter.line(benchmark);
@@ -235,8 +235,8 @@ var Riot = {
     return fn.toString().match(/^[^\{]*{((.*\n*)*)}/m)[1];
   },
 
-  withRiot: function(fn) {
-    return function() { eval('with (Riot) {\n' + Riot.functionBody(fn) + '\n}\n'); }
+  withThis: function(that, fn) {
+    return function() { eval('with (that) {\n' + Riot.functionBody(fn) + '\n}\n'); }
   },
 
   context: function(title, callback) {
@@ -248,11 +248,7 @@ var Riot = {
 
   given: function(title, callback) {
     title = 'Given ' + title;
-    return this.context(title, callback);
-  },
-
-  asserts: function(name, result) {
-    return new Riot.Assertion(name, result);
+    return Riot.context(title, callback);
   },
 
   setup: function(setupFunction) {
@@ -263,12 +259,7 @@ var Riot = {
     this.teardownFunction = teardownFunction;
   },
 
-  reset: function() {
-    this.results = [];
-  },
-
-  summariseResults:    function() { return this.summarise(this.results); },
-  summariseAllResults: function() { return this.summarise(this.all_results); },
+  summariseAllResults: function() { return this.summarise(this.results); },
 
   summarise: function(results) {
     var failures = 0;
@@ -285,8 +276,5 @@ var Riot = {
       context:   context
     };
     this.results.push(result);
-    this.all_results.push(result);
   }
 };
-
-Riot.should = Riot.asserts;

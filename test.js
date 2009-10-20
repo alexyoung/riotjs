@@ -5,6 +5,10 @@ if (typeof load != 'undefined') {
 Riot.run(function() {
   context('Basic riot functionality', function() {
     given('some simple equality tests', function() {
+      setup(function() {
+        return true;
+      });
+
       asserts('a simple truth test should return true', true).isTrue();
       asserts('isNull is null', null).isNull();
     });
