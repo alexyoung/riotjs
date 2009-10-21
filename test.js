@@ -42,7 +42,7 @@ Riot.run(function() {
     });
   });
 
-  given('1.2 yet another context', function() {
+  context('1.2 yet another context', function() {
     asserts('equals should compare strings as expected', 'test string').equals('test string');
   });
 

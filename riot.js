@@ -34,7 +34,7 @@ var Riot = {
 
   runAllContexts: function(tests) {
     if (typeof tests !== 'undefined') {
-      this.withThis(Riot, tests)();
+      this.withDSL(tests)();
     }
 
     for (var i = 0; i < this.contexts.length; i++) {
@@ -46,8 +46,15 @@ var Riot = {
     return fn.toString().match(/^[^\{]*{((.*\n*)*)}/m)[1];
   },
 
-  withThis: function(that, fn) {
-    return function() { eval('with (that) {\n' + Riot.functionBody(fn) + '\n}\n'); };
+  withDSL: function(fn, context) {
+    var body = this.functionBody(fn);
+    body = "(function(context, given, asserts, should, setup, teardown) { " + body + " })";
+    return function() { eval(body)(Riot.context,
+                                   Riot.given,
+                                   function() { return context.asserts.apply(context, arguments); },
+                                   function() { return context.should.apply(context, arguments); },
+                                   function() { return context.setup.apply(context, arguments); },
+                                   function() { return context.teardown.apply(context, arguments); }) };
   },
 
   context: function(title, callback) {
@@ -197,7 +204,6 @@ Riot.Context = function(name, callback) {
   this.callback         = callback;
   this.assertions       = [];
   this.should           = this.asserts;
-  this.given            = Riot.given;
 };
 
 Riot.Context.prototype = {
@@ -229,7 +235,7 @@ Riot.Context.prototype = {
 
   run: function() {
     Riot.formatter.context(this.name);
-    Riot.withThis(this, this.callback)();
+    Riot.withDSL(this.callback, this)();
     this.runSetup();
     for (var i = 0; i < this.assertions.length; i++) {
       var pass = false,
