@@ -29,21 +29,27 @@ Riot.run(function() {
 });
 </pre>
 
+There are a few aliases to make tests (and output) read more naturally:
+
+* <code>context</code>: <code>given</code> -- Given will add "Given..." to the title in the test output
+* <code>asserts</code>: <code>should</code>
+
 h3. Assertions
 
 * <code>equals</code> - for example, <code>asserts('description').equals('value')</code>
+* <code>matches</code> - matches a regex
+* <code>typeOf</code> - aliased to isTypeOf, kindOf
 * <code>isNull</code>
 * <code>isTrue</code>
-* <code>typeOf</code>
 * <code>raises</code>
 
 h3. Riot.run
 
 <code>Riot.run(function() { // your tests });</code> just adds your tests to <code>window.onload</code>.  If there's already an <code>onload</code> handler it'll prepend it.  If there's no <code>window</code> it will just run the tests.
 
+It can also be called with no parameters to run tests defined with <code>Riot.context</code>.  This can be used to create a set of files with tests inside a <code>Riot.context</code> for each file
+
 h3. Todo
 
-* Add formatter for xpcomcore
-* Ask g-man about actual() -- I defer execution to transparently match functions/values, but does this make sense?
 * Extract the assertions into their own property list so adding user-defined ones is cleaner
-* If you don't give a damn then we don't give a fuck
+* Package as rubygem (-xpcc)

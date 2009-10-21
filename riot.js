@@ -1,13 +1,18 @@
 /*jslint white: false plusplus: false onevar: false browser: true evil: true*/
 /*global window: true*/
 var Riot = {
-  results: [],
+  results:  [],
+  contexts: [],
 
   run: function(tests) {
-    if (typeof window === 'undefined') {
+    if (typeof XPCOMCore !== 'undefined') {
+      Riot.formatter = new Riot.Formatters.XPComCore();
+      Riot.runAndReport(tests);
+      Sys.exit(Riot.exitCode);
+    } else if (typeof window === 'undefined') {
       Riot.formatter = new Riot.Formatters.Text();
       Riot.runAndReport(tests);
-      java.lang.System.exit(Riot.exit_code);
+      java.lang.System.exit(Riot.exitCode);
     } else {
       Riot.formatter = new Riot.Formatters.HTML();
       var onload = window.onload;
@@ -19,10 +24,20 @@ var Riot = {
   },
 
   runAndReport: function(tests) {
-    var benchmark = Riot.Benchmark.run(1, this.withThis(Riot, tests));
+    var benchmark = Riot.Benchmark.run(1, function() { Riot.runAllContexts(tests); });
     Riot.formatter.separator();
     Riot.summariseAllResults();
     Riot.formatter.line(benchmark);
+  },
+
+  runAllContexts: function(tests) {
+    if (typeof tests !== 'undefined') {
+      this.withThis(Riot, tests)();
+    }
+
+    for (var i = 0; i < this.contexts.length; i++) {
+      this.contexts[i].run();
+    }
   },
 
   functionBody: function(fn) {
@@ -34,23 +49,14 @@ var Riot = {
   },
 
   context: function(title, callback) {
-    var context = new Riot.Context(title, callback, this.setupFunction, this.teardownFunction);
-    this.setupFunction = undefined;
-    this.teardownFunction = undefined;
-    return context.run();
+    var context = new Riot.Context(title, callback);
+    Riot.contexts.push(context);
+    return context;
   },
 
   given: function(title, callback) {
     title = 'Given ' + title;
     return Riot.context(title, callback);
-  },
-
-  setup: function(setupFunction) {
-    this.setupFunction = setupFunction;
-  },
-
-  teardown: function(teardownFunction) {
-    this.teardownFunction = teardownFunction;
   },
 
   summariseAllResults: function() { return this.summarise(this.results); },
@@ -61,7 +67,7 @@ var Riot = {
       if (!results[i].pass) { failures++; }
     }
     this.formatter.line(results.length + ' assertions: ' + failures + ' failures');
-    this.exit_code = failures > 0 ? 1 : 0;
+    this.exitCode = failures > 0 ? 1 : 0;
   },
 
   addResult: function(context, assertion, pass) {
@@ -167,14 +173,39 @@ Riot.Formatters = {
     this.separator = function() {
       this.line('');
     };
+  },
+
+  XPComCore: function() {
+    this.line = function(text) {
+      puts(text);
+    };
+
+    this.pass = function(message) {
+      this.line('  +[32m ' + message + '[0m');
+    };
+
+    this.fail = function(message) {
+      this.line('  -[31m ' + message + '[0m');
+    };
+
+    this.error = function(message, exception) {
+      this.fail(message);
+      this.line('  Exception: ' + exception);
+    };
+
+    this.context = function(name) {
+      this.line(name);
+    };
+
+    this.separator = function() {
+      this.line('');
+    };
   }
 };
 
-Riot.Context = function(name, callback, setup, teardown) {
+Riot.Context = function(name, callback) {
   this.name             = name;
   this.callback         = callback;
-  this.setupFunction    = setup;
-  this.teardownFunction = teardown;
   this.assertions       = [];
   this.should           = this.asserts;
   this.given            = Riot.given;
@@ -187,13 +218,21 @@ Riot.Context.prototype = {
     return assertion;
   },
 
-  setup: function() {
+  setup: function(setupFunction) {
+    this.setupFunction = setupFunction;
+  },
+
+  teardown: function(teardownFunction) {
+    this.teardownFunction = teardownFunction;
+  },
+
+  runSetup: function() {
     if (typeof this.setupFunction !== 'undefined') {
       return this.setupFunction();
     }
   },
 
-  teardown: function() {
+  runTeardown: function() {
     if (typeof this.teardownFunction !== 'undefined') {
       return this.teardownFunction();
     }
@@ -202,7 +241,7 @@ Riot.Context.prototype = {
   run: function() {
     Riot.formatter.context(this.name);
     Riot.withThis(this, this.callback)();
-
+    this.runSetup();
     for (var i = 0; i < this.assertions.length; i++) {
       var pass = false,
           assertion = this.assertions[i];
@@ -220,6 +259,7 @@ Riot.Context.prototype = {
 
       Riot.addResult(this.name, assertion.name, pass);
     }
+    this.runTeardown();
   }
 };
 
@@ -229,11 +269,12 @@ Riot.AssertionFailure = function(message) {
   return error;
 };
 
-Riot.Assertion = function(context_name, name, expected) {
-  this.name           = name;
-  this.expected_value = expected;
-  this.context_name   = context_name;
-  this.kindOf         = this.typeOf;
+Riot.Assertion = function(contextName, name, expected) {
+  this.name          = name;
+  this.expectedValue = expected;
+  this.contextName   = contextName;
+  this.kindOf        = this.typeOf;
+  this.isTypeOf      = this.typeOf;
 
   this.setAssertion(function(actual) {
     if ((actual() === null) || (actual() === undefined)) {
@@ -257,19 +298,18 @@ Riot.Assertion.prototype = {
   },
 
   expected: function() {
-    if (typeof this.expected_memo === 'undefined') {
-      if (typeof this.expected_value === 'function') {
+    if (typeof this.expectedMemo === 'undefined') {
+      if (typeof this.expectedValue === 'function') {
         try {
-          this.expected_memo = this.expected_value();
+          this.expectedMemo = this.expectedValue();
         } catch (exception) {
-          this.expected_value = exception;
+          this.expectedValue = exception;
         }
       } else {
-        this.expected_memo = this.expected_value;
+        this.expectedMemo = this.expectedValue;
       }
     }
-
-    return this.expected_memo;
+    return this.expectedMemo;
   },
 
   /* Assertions */
