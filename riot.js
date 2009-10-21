@@ -24,10 +24,12 @@ var Riot = {
   },
 
   runAndReport: function(tests) {
+    this.running = true;
     var benchmark = Riot.Benchmark.run(1, function() { Riot.runAllContexts(tests); });
     Riot.formatter.separator();
     Riot.summariseAllResults();
     Riot.formatter.line(benchmark);
+    this.running = false;
   },
 
   runAllContexts: function(tests) {
@@ -50,7 +52,13 @@ var Riot = {
 
   context: function(title, callback) {
     var context = new Riot.Context(title, callback);
-    Riot.contexts.push(context);
+
+    if (this.running) {
+      context.run();
+    } else {
+      Riot.contexts.push(context);
+    }
+
     return context;
   },
 
