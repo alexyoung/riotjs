@@ -176,30 +176,11 @@ Riot.Formatters = {
   },
 
   XPComCore: function() {
-    this.line = function(text) {
+    var formatter = new Riot.Formatters.Text();
+    formatter.line = function(text) {
       puts(text);
     };
-
-    this.pass = function(message) {
-      this.line('  +[32m ' + message + '[0m');
-    };
-
-    this.fail = function(message) {
-      this.line('  -[31m ' + message + '[0m');
-    };
-
-    this.error = function(message, exception) {
-      this.fail(message);
-      this.line('  Exception: ' + exception);
-    };
-
-    this.context = function(name) {
-      this.line(name);
-    };
-
-    this.separator = function() {
-      this.line('');
-    };
+    return formatter;
   }
 };
 
