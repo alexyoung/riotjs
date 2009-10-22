@@ -43,7 +43,7 @@ var Riot = {
   },
 
   functionBody: function(fn) {
-    return fn.toString().match(/^[^\{]*{((.*\n*)*)}/m)[1];
+    return '(' + fn.toString().replace(/\s+$/, '') + ')()';
   },
 
   withDSL: function(fn, context) {
