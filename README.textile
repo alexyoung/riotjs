@@ -1,8 +1,10 @@
-This is a JavaScript implementation of "Riot":http://github.com/thumblemonks/riot/
+This is a JavaScript implementation of "Riot":http://github.com/thumblemonks/riot/.
 
 It will run in a browser or in Rhino.
 
-The tests look like this:
+h3. Example
+
+Tests look like this:
 
 <pre>
 Riot.run(function() {
@@ -49,7 +51,7 @@ h3. Riot.run
 
 It can also be called with no parameters to run tests defined with <code>Riot.context</code>.  This can be used to create a set of files with tests inside a <code>Riot.context</code> for each file
 
-h3. Todo
+h3. Packaging
 
-* Extract the assertions into their own property list so adding user-defined ones is cleaner
-* Package as rubygem (-xpcc)
+Packaged as a RubyGem usable via "XPCOMCore-RubyGems":http://github.com/conflagrationjs/xpcomcore-rubygem -- "riotjs-xpcc":http://github.com/conflagrationjs/riotjs-xpcc.
+
