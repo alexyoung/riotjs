@@ -18,11 +18,10 @@ var Riot = {
         break;
       case 'browser':
         Riot.formatter = new Riot.Formatters.HTML();
-        var onload = window.onload;
-        window.onload = function() {
+        Riot.onload(function() {
           if (onload) { window.onload(); }
           Riot.runAndReport(tests);
-        };
+        });
         break;
     }
   },
@@ -39,6 +38,43 @@ var Riot = {
     } else {
       return 'browser';
     }
+  },
+
+  onload: function(callback) {
+    function init() {
+      if (arguments.callee.done) return;
+      arguments.callee.done = true;
+      if (_timer) clearInterval(_timer);
+      callback();
+    }
+
+    if (document.addEventListener) {
+      document.addEventListener("DOMContentLoaded", init, false);
+    }
+
+    /* for Internet Explorer */
+    /*@cc_on @*/
+    /*@if (@_win32)
+      document.write("<script id=__ie_onload defer src=javascript:void(0)><\/script>")
+      var script = document.getElementById("__ie_onload")
+      script.onreadystatechange = function() {
+        if (this.readyState == "complete") {
+          init()
+        }
+      }
+    /*@end @*/
+
+    /* for Safari */
+    if (/WebKit/i.test(navigator.userAgent)) {
+      var _timer = setInterval(function() {
+        if (/loaded|complete/.test(document.readyState)) {
+          init();
+        }
+      }, 10);
+    }
+
+    /* for other browsers */
+    window.onload = init;
   },
 
   runAndReport: function(tests) {
