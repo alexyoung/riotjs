@@ -207,7 +207,6 @@ Riot.Context = function(name, callback) {
   this.name             = name;
   this.callback         = callback;
   this.assertions       = [];
-  this.should           = this.asserts;
 };
 
 Riot.Context.prototype = {
@@ -215,6 +214,10 @@ Riot.Context.prototype = {
     var assertion = new Riot.Assertion(this.name, name, result);
     this.assertions.push(assertion);
     return assertion;
+  },
+
+  should: function(name, result) {
+    return this.asserts('should ' + name, result);
   },
 
   setup: function(setupFunction) {
