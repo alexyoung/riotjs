@@ -293,7 +293,7 @@ Riot.Assertion.prototype = {
   },
 
   fail: function(message) {
-    throw(new Riot.AssertionFailure(message));
+    throw(new Riot.AssertionFailure(this.name + ': ' + message));
   },
 
   expected: function() {
