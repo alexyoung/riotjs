@@ -5,7 +5,7 @@ var Riot = {
   contexts: [],
 
   run: function(tests) {
-    switch (this.detectEnvironment()) {
+    switch (Riot.detectEnvironment()) {
       case 'xpcomcore':
         Riot.formatter = new Riot.Formatters.XPComCore();
         Riot.runAndReport(tests);
