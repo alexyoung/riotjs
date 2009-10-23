@@ -5,21 +5,39 @@ var Riot = {
   contexts: [],
 
   run: function(tests) {
-    if (typeof XPCOMCore !== 'undefined') {
-      Riot.formatter = new Riot.Formatters.XPComCore();
-      Riot.runAndReport(tests);
-      Sys.exit(Riot.exitCode);
-    } else if (typeof window === 'undefined') {
-      Riot.formatter = new Riot.Formatters.Text();
-      Riot.runAndReport(tests);
-      java.lang.System.exit(Riot.exitCode);
-    } else {
-      Riot.formatter = new Riot.Formatters.HTML();
-      var onload = window.onload;
-      window.onload = function() {
-        if (onload) { window.onload(); }
+    switch (this.detectEnvironment()) {
+      case 'xpcomcore':
+        Riot.formatter = new Riot.Formatters.XPComCore();
         Riot.runAndReport(tests);
-      };
+        Sys.exit(Riot.exitCode);
+        break;
+      case 'rhino':
+        Riot.formatter = new Riot.Formatters.Text();
+        Riot.runAndReport(tests);
+        java.lang.System.exit(Riot.exitCode);
+        break;
+      case 'browser':
+        Riot.formatter = new Riot.Formatters.HTML();
+        var onload = window.onload;
+        window.onload = function() {
+          if (onload) { window.onload(); }
+          Riot.runAndReport(tests);
+        };
+        break;
+    }
+  },
+
+  detectEnvironment: function() {
+    if (typeof this.env !== 'undefined') {
+      return this.env;
+    }
+
+    if (typeof XPCOMCore !== 'undefined') {
+      return 'xpcomcore';
+    } else if (typeof window === 'undefined') {
+      return 'rhino';
+    } else {
+      return 'browser';
     }
   },
 
