@@ -394,6 +394,14 @@ Riot.Assertion.prototype = {
     });
   },
 
+  isFalse: function() {
+    this.setAssertion(function(actual) {
+      if (actual() !== false) {
+        this.fail(actual() + ' was not false');
+      }
+    });
+  },
+
   isNull: function() {
     this.setAssertion(function(actual) {
       if (actual() !== null) {

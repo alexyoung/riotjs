@@ -10,6 +10,7 @@ Riot.run(function() {
       });
 
       asserts('a simple truth test should return true', true).isTrue();
+      asserts('a false test returns false', false).isFalse();
       asserts('isNull is null', null).isNull();
       asserts('no chained test expected a value', true);
     });
