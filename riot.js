@@ -178,6 +178,10 @@ Riot.Formatters = {
       display('<h3>' + name + '</h3>');
     };
 
+    this.given = function(name) {
+      display('<h4>' + name + '</h4>');
+    };
+
     this.separator = function() {
       display('<hr />');
     };
@@ -206,6 +210,10 @@ Riot.Formatters = {
     };
 
     this.context = function(name) {
+      this.line(name);
+    };
+
+    this.given = function(name) {
       this.line(name);
     };
 
@@ -261,7 +269,12 @@ Riot.Context.prototype = {
   },
 
   run: function() {
-    Riot.formatter.context(this.name);
+		if (this.name.match(/Given/)) {
+			Riot.formatter.given(this.name);
+		}
+		else {
+    	Riot.formatter.context(this.name);
+		}
     Riot.withDSL(this.callback, this)();
     this.runSetup();
     for (var i = 0; i < this.assertions.length; i++) {
