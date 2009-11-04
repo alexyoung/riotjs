@@ -269,7 +269,7 @@ Riot.Context.prototype = {
   },
 
   run: function() {
-		if (this.name.match(/Given/)) {
+		if (this.name.match(/^Given/)) {
 			Riot.formatter.given(this.name);
 		}
 		else {
