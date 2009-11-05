@@ -268,13 +268,16 @@ Riot.Context.prototype = {
     }
   },
 
-  run: function() {
+  formatContextName: function() {
 		if (this.name.match(/^Given/)) {
 			Riot.formatter.given(this.name);
-		}
-		else {
+		} else {
     	Riot.formatter.context(this.name);
 		}
+  },
+
+  run: function() {
+    this.formatContextName();
     Riot.withDSL(this.callback, this)();
     this.runSetup();
     for (var i = 0; i < this.assertions.length; i++) {
