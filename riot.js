@@ -18,6 +18,14 @@ var Riot = {
         java.lang.System.exit(Riot.exitCode);
         break;
 
+      case 'non-browser-interpreter':
+        Riot.formatter = new Riot.Formatters.Text();
+        Riot.runAndReport(tests);
+        if (typeof quit !== 'undefined') {
+          quit(Riot.exitCode);
+        }
+        break;
+
       case 'browser':
         Riot.formatter = new Riot.Formatters.HTML();
         var onload = window.onload;
@@ -36,8 +44,10 @@ var Riot = {
 
     if (typeof XPCOMCore !== 'undefined') {
       return 'xpcomcore';
-    } else if (typeof window === 'undefined') {
+    } else if (typeof window === 'undefined' && typeof java !== 'undefined') {
       return 'rhino';
+    } else if (typeof window === 'undefined') {
+      return 'non-browser-interpreter';
     } else {
       return 'browser';
     }
