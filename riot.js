@@ -434,5 +434,13 @@ Riot.Assertion.prototype = {
         this.fail(actual() + ' was not null');
       }
     });
+  },
+
+  isNotNull: function() {
+    this.setAssertion(function(actual) {
+      if (actual() === null) {
+        this.fail(actual() + ' was null');
+      }
+    });
   }
 };
