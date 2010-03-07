@@ -52,7 +52,7 @@
 
       function checkReadyState() {
         if (document.readyState === 'complete') {
-          document.stopObserving('readystatechange', checkReadyState);
+          document.detachEvent('readystatechange', checkReadyState);
           fireContentLoadedEvent();
         }
       }
@@ -60,7 +60,7 @@
       function pollDoScroll() {
         try { document.documentElement.doScroll('left'); }
         catch(e) {
-          timer = pollDoScroll.defer();
+          timer = setTimeout(pollDoScroll, 10);
           return;
         }
         fireContentLoadedEvent();
@@ -69,9 +69,9 @@
       if (document.addEventListener) {
         document.addEventListener('DOMContentLoaded', fireContentLoadedEvent, false);
       } else {
-        document.observe('readystatechange', checkReadyState);
+        document.attachEvent('readystatechange', checkReadyState);
         if (window == top)
-          timer = pollDoScroll.defer();
+          timer = setTimeout(pollDoScroll, 10);
       }
 
       window.onload = fireContentLoadedEvent;
