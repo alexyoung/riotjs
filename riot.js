@@ -127,8 +127,17 @@
 
     requiredFiles: [],
 
+    indexOf: function(array, value) {
+      for (var i = 0; i < array.length; i++) {
+        if (array[i] === value) {
+          return i;
+        }
+      }
+      return -1;
+    },
+
     require: function() {
-      if (this.requiredFiles.indexOf(arguments[0]) == -1) {
+      if (this.indexOf(this.requiredFiles, arguments[0]) == -1) {
         this.requiredFiles.push(arguments[0]);
         if (Riot.detectEnvironment() !== 'browser') {
           this.load(arguments[0]);
