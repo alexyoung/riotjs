@@ -100,3 +100,8 @@ Note:
 * <code>Riot.run()</code> will only run once, so you can include multiple Riot test files
 * Specifying <code>Riot.run()</code> at the end of each test file lets you run that file with <code>js Riot.run()</code> in the console
 
+h3. Contributors
+
+* ac94 (Aron Carroll)
+* bgerrissen (Ben Gerrissen)
+

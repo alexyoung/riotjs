@@ -43,11 +43,19 @@ Riot.run(function() {
     });
   });
 
-  context('1.2 yet another context', function() {
+  context('1.2. Equality', function() {
+    given('1.2.1. isEqual()', function () {
+      should('return falsy when an empty object is supplied as the first param', function() {
+        return ! Riot.Assertion.prototype.isEqual({}, {a: 'a', b: 'b'});
+      }).isTrue();
+    });
+  });
+
+  context('1.3 Yet another context', function() {
     asserts('equals should compare strings as expected', 'test string').equals('test string');
   });
 
-  context('1.3 End', function() {
+  context('1.4 End', function() {
     asserts('this test should appear at the end', true);
   });
 });
