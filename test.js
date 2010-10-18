@@ -1,5 +1,8 @@
-if (typeof load != 'undefined') {
+var Riot;
+if (typeof load !== 'undefined') {
   load('riot.js');
+} else if (typeof require !== 'undefined') {
+  Riot = require('./riot').Riot;
 }
 
 Riot.run(function() {

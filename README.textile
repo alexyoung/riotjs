@@ -1,6 +1,6 @@
 This is a JavaScript implementation of "Riot":http://github.com/thumblemonks/riot/.
 
-It will run in a browser or in Rhino.
+It will run in a browser, Rhino, or Node.
 
 h3. Example
 
@@ -62,7 +62,13 @@ h3. Writing a test for a browser AND interpreter
 My current pattern looks like this:
 
 <pre>
-load('riot.js');
+var Riot;
+if (typeof load !== 'undefined') {
+  load('riot.js');
+} else if (typeof require !== 'undefined') {
+  Riot = require('./riot').Riot;
+}
+
 Riot.require('../turing.core.js');
 Riot.require('../turing.oo.js');
 Riot.require('fixtures/example_classes.js');  

@@ -1,6 +1,6 @@
 /*jslint white: false plusplus: false onevar: false browser: true evil: true*/
-/*global window: true*/
-(function(global) {
+/*riotGlobal window: true*/
+(function(riotGlobal) {
   var Riot = {
     results:  [],
     contexts: [],
@@ -17,6 +17,12 @@
           Riot.formatter = new Riot.Formatters.Text();
           Riot.runAndReport(tests);
           java.lang.System.exit(Riot.exitCode);
+          break;
+
+        case 'node':
+          Riot.formatter = new Riot.Formatters.Text();
+          Riot.runAndReport(tests);
+          // TODO: exit with exit code from riot
           break;
 
         case 'non-browser-interpreter':
@@ -115,6 +121,10 @@
         case 'non-browser-interpreter':
           load(arguments[0]);
           break;
+        case 'node':
+          // Evaluate the required code in the global context, like load() would
+          global.eval.call(global, Riot.node.fs.readFileSync(arguments[0]).toString());
+          break;
         case 'browser':
           var script = document.createElement('script'),
               head = document.getElementsByTagName('head');
@@ -150,15 +160,32 @@
         return this.env;
       }
 
-      if (typeof XPCOMCore !== 'undefined') {
-        return 'xpcomcore';
-      } else if (typeof window === 'undefined' && typeof java !== 'undefined') {
-        return 'rhino';
-      } else if (typeof window === 'undefined') {
-        return 'non-browser-interpreter';
-      } else {
-        return 'browser';
-      }
+      this.env = (function() {
+        if (typeof XPCOMCore !== 'undefined') {
+          Riot.puts = print;
+          return 'xpcomcore';
+        } else if (typeof window === 'undefined' && typeof java !== 'undefined') {
+          Riot.puts = print;
+          return 'rhino';
+        } else if (typeof exports !== 'undefined') {
+          // TODO: Node should be checked more thoroughly
+          Riot.node = {
+            fs: require('fs'),
+            sys: require('sys')
+          }
+
+          Riot.puts = Riot.node.sys.puts;
+
+          return 'node';
+        } else if (typeof window === 'undefined') {
+          Riot.puts = print;
+          return 'non-browser-interpreter';
+        } else {
+          return 'browser';
+        }
+      })();
+
+      return this.env;
     },
 
     runAndReport: function(tests) {
@@ -307,7 +334,7 @@
 
     Text: function() {
       function display(text) {
-        print(text);
+        Riot.puts(text);
       }
 
       this.line = function(text) {
@@ -584,11 +611,13 @@
     }
   };
 
-  if (typeof global.Riot === 'undefined') {
-    global.Riot = Riot;
+  if (typeof exports !== 'undefined') {
+    exports.Riot = Riot;
+  } else if (typeof riotGlobal.Riot === 'undefined') {
+    riotGlobal.Riot = Riot;
 
-    if (typeof global.load === 'undefined') {
-      global.load = function() { };
+    if (typeof riotGlobal.load === 'undefined') {
+      riotGlobal.load = function() { };
     }
   }
 })(typeof window === 'undefined' ? this : window);
